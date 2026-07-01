@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DB Nubers | Mi Plan Nutricional</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <aside class="sidebar">
+
+            <div>
+
+                <div class="logo">
+
+                    <div class="logo-icon">
+                        DN
+                    </div>
+
+                    <div>
+
+                        <h2>DB Nubers</h2>
+
+                        <p>Portal del Paciente</p>
+
+                    </div>
+
+                </div>
+
+                <nav class="menu">
+
+                    <button onclick="showView('profileView')">
+
+                        👤
+
+                        <span>Mi Perfil</span>
+
+                    </button>
+
+                    <button onclick="showView('planView')">
+
+                        🥗
+
+                        <span>Mi Plan</span>
+
+                    </button>
+
+                </nav>
+
+            </div>
+
+            <div class="sidebar-footer">
+
+                <div class="profile-mini">
+
+                    <div class="avatar">
+
+                        🙂
+
+                    </div>
+
+                    <div>
+
+                        <strong>Paciente</strong>
+
+                        <small>Acceso personal</small>
+
+                    </div>
+
+                </div>
+
+                <button class="logout" onclick="logout()">
+
+                    Cerrar sesión
+
+                </button>
+
+            </div>
+
+        </aside>
+
+        <main class="content">
+
+            <header class="topbar">
+
+                <div>
+
+                    <h1>¡Bienvenido!</h1>
+
+                    <p>
+
+                        Consulta tu evolución, revisa tu plan nutricional y mantente al día con tu seguimiento.
+
+                    </p>
+
+                </div>
+
+                <div class="topbar-actions">
+
+                    <div class="notification">
+
+                        🥗
+
+                    </div>
+
+                </div>
+
+            </header>
+
+            <section id="profileView" class="view">
+
+                <div class="profile-header">
+
+                    <div class="profile-avatar">
+
+                        👤
+
+                    </div>
+
+                    <div>
+
+                        <h2>Mi Perfil</h2>
+
+                        <p>
+
+                            Toda tu información clínica y nutricional actualizada.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <span>⚖️</span>
+
+                        <h2 id="weightValue">--</h2>
+
+                        <p>Peso</p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <span>📏</span>
+
+                        <h2 id="heightValue">--</h2>
+
+                        <p>Altura</p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <span>📊</span>
+
+                        <h2 id="bmiValue">--</h2>
+
+                        <p>IMC</p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <span>❤️</span>
+
+                        <h2>Activo</h2>
+
+                        <p>Estado</p>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-grid">
+
+                    <div class="card">
+
+                        <h3>Información Personal</h3>
+
+                        <div id="patientData">
+
+                        </div>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Objetivo</h3>
+
+                        <p>
+
+                            Mantén constancia con tu alimentación y sigue las recomendaciones de tu nutricionista para
+                            alcanzar tus metas de forma saludable.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section id="planView" class="view" style="display:none;">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h1>Mi Plan Nutricional</h1>
+
+                        <p>
+
+                            Accede al plan asignado por tu nutricionista.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div id="planContainer">
+
+                        <p class="empty">
+
+                            Todavía no tienes un plan nutricional asignado.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-grid">
+
+                    <div class="card">
+
+                        <h3>Recomendaciones</h3>
+
+                        <ul class="tips-list">
+
+                            <li>💧 Mantente hidratado durante el día.</li>
+
+                            <li>🥗 Respeta los horarios establecidos.</li>
+
+                            <li>🍎 Prioriza alimentos frescos.</li>
+
+                            <li>🏃 Complementa con actividad física.</li>
+
+                            <li>😴 Descansa al menos 7 u 8 horas.</li>
+
+                        </ul>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Seguimiento</h3>
+
+                        <p>
+
+                            Recuerda asistir a los controles programados para evaluar tu progreso y realizar los ajustes
+                            necesarios en tu plan nutricional.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script type="module" src="patient.js"></script>
+
+</body>
+
+</html>

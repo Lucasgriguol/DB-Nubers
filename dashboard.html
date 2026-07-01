@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>DB Nubers | Panel Profesional</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <aside class="sidebar">
+
+            <div>
+
+                <div class="logo">
+
+                    <div class="logo-icon">
+                        DN
+                    </div>
+
+                    <div>
+
+                        <h2>DB Nubers</h2>
+
+                        <p>Nutrición Inteligente</p>
+
+                    </div>
+
+                </div>
+
+                <nav class="menu">
+
+                    <button id="dashboardBtn">
+                        🏠
+                        <span>Inicio</span>
+                    </button>
+
+                    <button id="patientsBtn">
+                        👥
+                        <span>Pacientes</span>
+                    </button>
+
+                    <button id="settingsBtn">
+                        ⚙️
+                        <span>Configuración</span>
+                    </button>
+
+                </nav>
+
+            </div>
+
+            <div class="sidebar-footer">
+
+                <div class="profile-mini">
+
+                    <div class="avatar" id="userAvatar">A</div>
+
+                    <div>
+
+                        <strong id="userName">Administrador</strong>
+
+                        <small>Nutricionista</small>
+
+                    </div>
+
+                </div>
+
+                <button class="logout" onclick="logout()">
+                    Cerrar sesión
+                </button>
+
+            </div>
+
+        </aside>
+
+        <main class="content">
+
+            <header class="topbar">
+
+                <div>
+
+                    <h1>Panel de control</h1>
+
+                    <p>
+                        Gestiona pacientes, planes nutricionales y toda la información desde un único lugar.
+                    </p>
+
+                </div>
+
+                <div class="topbar-actions">
+
+                    <input type="text" id="searchPatient" placeholder="Buscar paciente...">
+
+                </div>
+
+            </header>
+
+            <section class="view" id="dashboardView">
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+                        <span>👥</span>
+                        <h2 id="patientsCount">0</h2>
+                        <p>Pacientes registrados</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>📄</span>
+                        <h2 id="plansCount">0</h2>
+                        <p>Planes asignados</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>📝</span>
+                        <h2 id="notesCount">0</h2>
+                        <p>Pacientes con notas</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>⚖️</span>
+                        <h2 id="avgBmi">0.0</h2>
+                        <p>IMC promedio</p>
+                    </div>
+
+                </div>
+
+                <div class="dashboard-grid">
+
+                    <div class="card">
+
+                        <h3>Bienvenido a DB Nubers</h3>
+
+                        <p>
+                            Desde este panel podrás registrar pacientes, actualizar datos físicos,
+                            cargar planes alimenticios, realizar seguimientos y consultar toda la
+                            información clínica de manera centralizada.
+                        </p>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Estado del sistema</h3>
+
+                        <ul class="system-list">
+                            <li> ✔ Base de datos conectada</li>
+                            <li> ✔ Gestión de pacientes disponible</li>
+                            <li> ✔ Planes nutricionales habilitados</li>
+                            <li> ✔ Seguimiento clínico activo</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="view" id="patientsView" style="display:none;">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h1>Pacientes</h1>
+
+                        <p>
+                            Selecciona un paciente para administrar su información.
+                        </p>
+
+                    </div>
+
+                    <button id="newPatientBtn">
+                        ＋ Nuevo paciente
+                    </button>
+
+                </div>
+
+                <div id="patientsList" class="patients-grid">
+                    <p class="empty">No hay pacientes registrados.</p>
+                </div>
+
+            </section>
+
+            <section class="view" id="patientView" style="display:none;"></section>
+
+            <section class="view" id="settingsView" style="display:none;">
+
+                <h1>Configuración</h1>
+
+                <div class="settings-grid">
+
+                    <div class="card">
+                        <h3>Cuenta</h3>
+                        <p>Modo administrador</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Copia de seguridad</h3>
+                        <p>Proximamente</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <div id="patientModal" class="modal">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h2>Nuevo paciente</h2>
+                <br>
+                <button id="closeModal">✕</button>
+
+            </div>
+            <br>
+            <p class="modal-subtitle">
+                Completa la información para registrar un nuevo paciente.
+            </p>
+            <br>
+            <form id="patientForm">
+
+                <div class="input-group">
+                    <label>Nombre completo</label>
+                    <input type="text" id="name" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="patientEmail" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="patientPassword" required>
+                </div>
+                <br>
+                <button type="submit" class="primary">
+                    Crear paciente
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="script.js"></script>
+
+</body>
+
+</html>
