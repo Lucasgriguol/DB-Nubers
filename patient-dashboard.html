@@ -122,6 +122,7 @@
 
             </header>
 
+            <!-- VISTA PERFIL -->
             <section id="profileView" class="view">
 
                 <div class="profile-header">
@@ -146,6 +147,7 @@
 
                 </div>
 
+                <!-- Stats básicos -->
                 <div class="stats-grid">
 
                     <div class="stat-card">
@@ -154,7 +156,7 @@
 
                         <h2 id="weightValue">--</h2>
 
-                        <p>Peso</p>
+                        <p>Peso (kg)</p>
 
                     </div>
 
@@ -164,7 +166,7 @@
 
                         <h2 id="heightValue">--</h2>
 
-                        <p>Altura</p>
+                        <p>Altura (cm)</p>
 
                     </div>
 
@@ -182,7 +184,7 @@
 
                         <span>❤️</span>
 
-                        <h2>Activo</h2>
+                        <h2 id="statusValue">Activo</h2>
 
                         <p>Estado</p>
 
@@ -190,6 +192,7 @@
 
                 </div>
 
+                <!-- Grid de medidas completas -->
                 <div class="dashboard-grid">
 
                     <div class="card">
@@ -198,20 +201,76 @@
 
                         <div id="patientData">
 
+                            <p class="empty">Cargando datos...</p>
+
                         </div>
 
                     </div>
 
                     <div class="card">
 
-                        <h3>Objetivo</h3>
+                        <h3>📝 Notas del Nutricionista</h3>
 
-                        <p>
+                        <div id="notesContainer">
 
-                            Mantén constancia con tu alimentación y sigue las recomendaciones de tu nutricionista para
-                            alcanzar tus metas de forma saludable.
+                            <p class="empty">No hay notas disponibles.</p>
 
-                        </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Medidas antropométricas completas -->
+                <div class="card" style="margin-top:1.5rem;">
+
+                    <h3>📊 Medidas Antropométricas Completas</h3>
+
+                    <div class="patient-measurements-grid">
+
+                        <!-- Datos personales -->
+                        <div class="measure-group">
+                            <h4>📋 Datos personales</h4>
+                            <p><strong>Fecha de nacimiento:</strong> <span id="displayBirthDate">--</span></p>
+                            <p><strong>Edad:</strong> <span id="displayAge">--</span> años</p>
+                        </div>
+
+                        <!-- Perímetros -->
+                        <div class="measure-group">
+                            <h4>📐 Perímetros (cm)</h4>
+                            <p><strong>Cintura máxima:</strong> <span id="displayWaistMax">--</span></p>
+                            <p><strong>Cintura mínima:</strong> <span id="displayWaistMin">--</span></p>
+                            <p><strong>Caderas:</strong> <span id="displayHip">--</span></p>
+                            <p><strong>Brazo flexionado:</strong> <span id="displayArmFlexed">--</span></p>
+                            <p><strong>Muslo medio:</strong> <span id="displayThighMid">--</span></p>
+                            <p><strong>Pantorrilla:</strong> <span id="displayCalf">--</span></p>
+                        </div>
+
+                        <!-- Composición corporal (kg) -->
+                        <div class="measure-group">
+                            <h4>⚖️ Composición corporal (kg)</h4>
+                            <p><strong>Masa grasa:</strong> <span id="displayFatMassKg">--</span></p>
+                            <p><strong>Masa muscular:</strong> <span id="displayMuscleMassKg">--</span></p>
+                            <p><strong>Masa ósea:</strong> <span id="displayBoneMassKg">--</span></p>
+                        </div>
+
+                        <!-- Composición corporal (%) -->
+                        <div class="measure-group">
+                            <h4>📊 Composición corporal (%)</h4>
+                            <p><strong>% Masa muscular:</strong> <span id="displayMusclePercent">--</span></p>
+                            <p><strong>% Masa adiposa:</strong> <span id="displayFatPercent">--</span></p>
+                            <p><strong>% Masa ósea:</strong> <span id="displayBonePercent">--</span></p>
+                            <p><strong>% Residual y piel:</strong> <span id="displayResidualPercent">--</span></p>
+                        </div>
+
+                        <!-- Índices y sumatorias -->
+                        <div class="measure-group">
+                            <h4>🧮 Índices y sumatorias</h4>
+                            <p><strong>Sumatoria 6 pliegues:</strong> <span id="displaySkinfoldsSum">--</span></p>
+                            <p><strong>Índice Músculo-Óseo:</strong> <span id="displayMuscleBoneIndex">--</span></p>
+                            <p><strong>Índice Cintura-Cadera:</strong> <span id="displayWaistHipIndex">--</span></p>
+                            <p><strong>Índice Músculo-Adiposo:</strong> <span id="displayMuscleFatIndex">--</span></p>
+                        </div>
 
                     </div>
 
@@ -219,6 +278,7 @@
 
             </section>
 
+            <!-- VISTA PLAN -->
             <section id="planView" class="view" style="display:none;">
 
                 <div class="section-header">

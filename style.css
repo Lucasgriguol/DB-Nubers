@@ -961,3 +961,365 @@ padding: 16px;
 }
 
 }
+/* =========================
+   MEDIDAS DEL NUTRICIONISTA (dashboard)
+========================= */
+
+.measurements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.measure-group {
+    background: var(--surface-2);
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+}
+
+.measure-group h3 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    color: var(--primary-darker);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+}
+
+.measure-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin: 0.4rem 0;
+    color: var(--text);
+    gap: 0.5rem;
+}
+
+.measure-group label span {
+    flex: 1;
+    font-weight: 500;
+}
+
+.measure-group label input {
+    width: 60%;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    min-width: 80px;
+}
+
+.measure-group label input:read-only {
+    background: var(--surface-2);
+    cursor: not-allowed;
+}
+
+.measure-group label input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(52, 101, 169, .15);
+}
+
+/* =========================
+   MEDIDAS DEL PACIENTE (patient-dashboard)
+========================= */
+
+.patient-measurements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.patient-measurements-grid .measure-group {
+    background: var(--surface-2);
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+}
+
+.patient-measurements-grid .measure-group h4 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+    color: var(--primary-darker);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+}
+
+.patient-measurements-grid .measure-group p {
+    margin: 0.4rem 0;
+    font-size: 0.9rem;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.patient-measurements-grid .measure-group p strong {
+    color: var(--dark-2);
+    font-weight: 600;
+}
+
+.patient-measurements-grid .measure-group p span {
+    color: var(--text);
+    font-weight: 500;
+    background: white;
+    padding: 0.1rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    min-width: 50px;
+    text-align: right;
+}
+
+/* =========================
+   NOTAS DEL NUTRICIONISTA (para paciente)
+========================= */
+
+#notesContainer {
+    min-height: 80px;
+}
+
+#notesContainer .empty {
+    color: var(--text-soft);
+    font-style: italic;
+    margin: 0.5rem 0;
+}
+
+#notesContainer .note-content {
+    background: var(--surface-2);
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--primary);
+}
+
+#notesContainer .note-content p {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.7;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+#notesContainer .note-date {
+    margin: 0.6rem 0 0 0;
+    font-size: 0.8rem;
+    color: var(--text-soft);
+}
+
+/* =========================
+   BOTONES DE ACCIÓN EN PACIENTE
+========================= */
+
+#patientView .primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 0.7rem 1.8rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(52, 101, 169, .25);
+}
+
+#patientView .primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(52, 101, 169, .35);
+}
+
+#patientView .secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    border: 1px solid var(--border);
+}
+
+#patientView .secondary:hover {
+    background: var(--border);
+}
+
+#patientView .danger {
+    background: var(--danger);
+    color: #fff;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+}
+
+#patientView .danger:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* =========================
+   PLAN NUTRICIONAL (paciente)
+========================= */
+
+#planContainer .plan-link {
+    display: inline-block;
+    background: var(--success);
+    color: #fff;
+    padding: 0.8rem 1.8rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+#planContainer .plan-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(55, 178, 108, .3);
+}
+
+#planContainer .empty {
+    color: var(--text-soft);
+    font-style: italic;
+}
+
+/* =========================
+   RESPONSIVE: TABLET
+========================= */
+
+@media (max-width: 1024px) {
+
+    .measurements-grid,
+    .patient-measurements-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+
+    .measure-group label {
+        flex-wrap: wrap;
+    }
+
+    .measure-group label input {
+        width: 100%;
+        min-width: unset;
+    }
+
+}
+
+/* =========================
+   RESPONSIVE: MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .measurements-grid,
+    .patient-measurements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .measure-group {
+        padding: 0.8rem 1rem;
+    }
+
+    .measure-group label {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.2rem;
+    }
+
+    .measure-group label span {
+        font-size: 0.85rem;
+    }
+
+    .measure-group label input {
+        width: 100%;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .patient-measurements-grid .measure-group p {
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    .patient-measurements-grid .measure-group p span {
+        min-width: 40px;
+        font-size: 0.8rem;
+    }
+
+    #patientView {
+        padding: 16px;
+    }
+
+    #patientView h1 {
+        font-size: 24px;
+    }
+
+    #patientView .danger {
+        width: 100%;
+        text-align: center;
+    }
+
+    #patientView .primary,
+    #patientView .secondary {
+        width: 100%;
+        text-align: center;
+    }
+
+}
+
+/* =========================
+   EXTRA: ESTILOS PARA EL PERFIL DEL PACIENTE
+========================= */
+
+.patient-card .patient-email {
+    display: block;
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 18px;
+    word-break: break-word;
+}
+
+.patient-card .patient-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(52, 101, 169, .1);
+    color: var(--primary-dark);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================
+   MEJORA DE ESTADÍSTICAS
+========================= */
+
+.stat-card .stat-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(52, 101, 169, .12);
+    font-size: 28px;
+    margin-bottom: 18px;
+}
+
+/* =========================
+   SCROLLBAR PERSONALIZADA
+========================= */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
