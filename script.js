@@ -39,6 +39,48 @@ function message(text, type = "error") {
     el.style.color = type === "success" ? "#2ecc71" : "#e74c3c";
 }
 
+// ========================================
+// FIX: LIMPIAR SESIÓN ANTERIOR
+// ========================================
+
+async function limpiarSesionFirebase() {
+    try {
+        // LocalStorage
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.includes('firebase') || key.includes('auth') || key.includes('__session')) {
+                localStorage.removeItem(key);
+                console.log('🗑️ Eliminado localStorage:', key);
+            }
+        });
+
+        // SessionStorage
+        const sessionKeys = Object.keys(sessionStorage);
+        sessionKeys.forEach(key => {
+            if (key.includes('firebase') || key.includes('auth') || key.includes('__session')) {
+                sessionStorage.removeItem(key);
+                console.log('🗑️ Eliminado sessionStorage:', key);
+            }
+        });
+
+        console.log('✅ Sesión de Firebase limpiada');
+    } catch (error) {
+        console.warn('⚠️ Error limpiando sesión:', error);
+    }
+}
+
+// Configurar persistencia (no guardar sesión)
+await setPersistence(auth, inMemoryPersistence)
+    .then(() => {
+        console.log('✅ Persistencia configurada a "inMemory"');
+    })
+    .catch((error) => {
+        console.error('❌ Error configurando persistencia:', error);
+    });
+
+// Limpiar sesión anterior
+await limpiarSesionFirebase();
+
 /* =========================
    AUTH
 ========================= */
