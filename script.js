@@ -24,30 +24,51 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 // ========================================
+// 🔥 LOG: INICIO DE LA APLICACIÓN
+// ========================================
+
+console.log("🚀 ========================================");
+console.log("🚀 INICIANDO DB NUBERS - PANEL ADMIN");
+console.log("🚀 ========================================");
+console.log("📍 URL actual:", window.location.href);
+console.log("📍 Pathname:", window.location.pathname);
+console.log("📍 Hostname:", window.location.hostname);
+console.log("=========================================");
+
+// ========================================
 // 🔥 FIX: LIMPIAR SESIÓN ANTERIOR
 // ========================================
 
 async function limpiarSesionFirebase() {
+    console.log("🧹 Iniciando limpieza de sesión Firebase...");
+    
     try {
         // LocalStorage
         const keys = Object.keys(localStorage);
+        console.log("📦 Claves en localStorage:", keys.length);
+        
+        let eliminadas = 0;
         keys.forEach(key => {
             if (key.includes('firebase') || key.includes('auth') || key.includes('__session')) {
                 localStorage.removeItem(key);
                 console.log('🗑️ Eliminado localStorage:', key);
+                eliminadas++;
             }
         });
 
         // SessionStorage
         const sessionKeys = Object.keys(sessionStorage);
+        console.log("📦 Claves en sessionStorage:", sessionKeys.length);
+        
         sessionKeys.forEach(key => {
             if (key.includes('firebase') || key.includes('auth') || key.includes('__session')) {
                 sessionStorage.removeItem(key);
                 console.log('🗑️ Eliminado sessionStorage:', key);
+                eliminadas++;
             }
         });
 
-        console.log('✅ Sesión de Firebase limpiada');
+        console.log(`✅ Sesión de Firebase limpiada (${eliminadas} elementos eliminados)`);
     } catch (error) {
         console.warn('⚠️ Error limpiando sesión:', error);
     }
@@ -57,7 +78,8 @@ async function limpiarSesionFirebase() {
 // CONFIGURAR PERSISTENCIA
 // ========================================
 
-// Configurar persistencia (no guardar sesión)
+console.log("⚙️ Configurando persistencia de Firebase...");
+
 try {
     await setPersistence(auth, inMemoryPersistence);
     console.log('✅ Persistencia configurada a "inMemory" (no guarda sesión)');
@@ -67,6 +89,10 @@ try {
 
 // Limpiar sesión anterior
 await limpiarSesionFirebase();
+
+console.log("=========================================");
+console.log("⏳ Esperando eventos de autenticación...");
+console.log("=========================================");
 
 // ========================================
 // STATE
@@ -81,80 +107,220 @@ let selectedPatient = null;
 // ========================================
 
 function message(text, type = "error") {
+    console.log(`📨 Mensaje: ${text} (${type})`);
     const el = document.getElementById("message");
-    if (!el) return;
+    if (!el) {
+        console.warn("⚠️ Elemento #message no encontrado");
+        return;
+    }
 
     el.textContent = text;
     el.style.color = type === "success" ? "#2ecc71" : "#e74c3c";
 }
 
 // ========================================
-// AUTH
+// AUTH - ESTADO DE AUTENTICACIÓN
 // ========================================
 
-onAuthStateChanged(auth, async (user) => {
+console.log("👤 Configurando listener de autenticación...");
 
-    const page = window.location.pathname.split("/").pop();
+onAuthStateChanged(auth, async (user) => {
+    console.log("=========================================");
+    console.log("🔔 onAuthStateChanged EJECUTADO");
+    console.log("=========================================");
+    console.log("👤 Usuario recibido:", user ? `UID: ${user.uid}` : "null");
+    console.log("📍 Página actual:", window.location.pathname);
+    
+    const page = window.location.pathname.split("/").pop() || "index.html";
+    console.log("📄 Nombre de página:", page);
 
     if (!user) {
+        console.log("❌ No hay usuario autenticado");
         currentUser = null;
         currentUserData = null;
 
+        console.log(`🔍 Verificando si debemos redirigir a login...`);
+        console.log(`   - Página actual: "${page}"`);
+        console.log(`   - ¿Es index.html? ${page === "index.html"}`);
+        
         if (page !== "index.html") {
+            console.log(`🔄 Redirigiendo a index.html desde "${page}"`);
             window.location.href = "index.html";
-        }
-        return;
-    }
-
-    currentUser = user;
-
-    const ref = await getDoc(doc(db, "users", user.uid));
-    currentUserData = ref.exists() ? ref.data() : null;
-
-    console.log("UID:", currentUser?.uid);
-    console.log("ROLE:", currentUserData?.role);
-
-    if (page === "index.html") {
-        if (currentUserData?.role === "patient") {
-            window.location.href = "patient-dashboard.html";
         } else {
-            window.location.href = "dashboard.html";
+            console.log("✅ Ya estamos en index.html, no redirigimos");
         }
+        console.log("=========================================");
         return;
     }
 
-    if (page === "dashboard.html") {
-        loadPatients();
-        loadStats();
+    console.log("✅ Usuario autenticado correctamente");
+    currentUser = user;
+    console.log(`📧 Email: ${user.email}`);
+
+    try {
+        console.log("📡 Cargando datos del usuario desde Firestore...");
+        const ref = doc(db, "users", user.uid);
+        const docSnap = await getDoc(ref);
+        
+        if (docSnap.exists()) {
+            currentUserData = docSnap.data();
+            console.log("✅ Datos del usuario cargados:");
+            console.log("   - Nombre:", currentUserData.name || "Sin nombre");
+            console.log("   - Email:", currentUserData.email || "Sin email");
+            console.log("   - Rol:", currentUserData.role || "Sin rol");
+            console.log("   - ID:", user.uid);
+        } else {
+            console.warn("⚠️ El documento del usuario NO existe en Firestore");
+            currentUserData = null;
+        }
+
+        console.log("=========================================");
+        console.log("🔍 DECIDIENDO REDIRECCIÓN");
+        console.log("=========================================");
+        console.log(`📄 Página actual: "${page}"`);
+        console.log(`🎭 Rol del usuario: "${currentUserData?.role || 'undefined'}"`);
+        console.log(`🔗 ¿Es index.html? ${page === "index.html"}`);
+
+        // REDIRECCIÓN DESDE INDEX.HTML
+        if (page === "index.html") {
+            console.log("🔄 Estamos en index.html, redirigiendo según rol...");
+            
+            if (currentUserData?.role === "patient") {
+                console.log("🚀 Redirigiendo a patient-dashboard.html (rol: patient)");
+                window.location.replace("patient-dashboard.html");
+            } else if (currentUserData?.role === "admin" || currentUserData?.role === "nutritionist") {
+                console.log("🚀 Redirigiendo a dashboard.html (rol:", currentUserData?.role, ")");
+                window.location.replace("dashboard.html");
+            } else {
+                console.warn("⚠️ Rol desconocido o no definido:", currentUserData?.role);
+                console.log("🔄 Redirigiendo a dashboard.html por defecto");
+                window.location.replace("dashboard.html");
+            }
+            console.log("=========================================");
+            return;
+        }
+
+        // REDIRECCIÓN DESDE OTRAS PÁGINAS
+        if (page === "dashboard.html") {
+            console.log("📊 Estamos en dashboard.html, cargando datos...");
+            if (currentUserData?.role === "patient") {
+                console.warn("⚠️ Un paciente está en dashboard.html, redirigiendo a patient-dashboard.html");
+                window.location.replace("patient-dashboard.html");
+                return;
+            }
+            loadPatients();
+            loadStats();
+            console.log("✅ Dashboard cargado correctamente");
+        } else if (page === "patient-dashboard.html") {
+            console.log("👤 Estamos en patient-dashboard.html");
+            if (currentUserData?.role !== "patient") {
+                console.warn("⚠️ Un no-paciente está en patient-dashboard.html, redirigiendo a dashboard.html");
+                window.location.replace("dashboard.html");
+                return;
+            }
+            console.log("✅ Portal del paciente cargado correctamente");
+        } else {
+            console.log(`📄 Página actual: "${page}" - No se requiere redirección especial`);
+        }
+
+        console.log("=========================================");
+
+    } catch (error) {
+        console.error("❌ Error en onAuthStateChanged:", error);
+        console.error("   - Mensaje:", error.message);
+        console.error("   - Stack:", error.stack);
+        console.log("=========================================");
     }
 });
+
+console.log("✅ Listener de autenticación configurado");
 
 // ========================================
 // LOGIN
 // ========================================
 
-document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+console.log("🔑 Configurando formulario de login...");
 
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    
+    console.log("=========================================");
+    console.log("🔐 INTENTO DE LOGIN");
+    console.log("=========================================");
 
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
+    console.log(`📧 Email ingresado: ${email}`);
+    console.log(`🔑 Contraseña: ${password ? "****" : "vacía"}`);
+
+    if (!email || !password) {
+        console.warn("⚠️ Email o contraseña vacíos");
+        message("Por favor, completa todos los campos");
+        console.log("=========================================");
+        return;
+    }
+
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        console.log("📡 Enviando petición a Firebase Authentication...");
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        console.log("✅ Login EXITOSO");
+        console.log(`   - UID: ${result.user.uid}`);
+        console.log(`   - Email: ${result.user.email}`);
+        console.log(`   - Email verificado: ${result.user.emailVerified}`);
+
+        // Cargar datos del usuario
+        console.log("📡 Cargando datos del usuario logueado...");
+        const ref = doc(db, "users", result.user.uid);
+        const docSnap = await getDoc(ref);
+        
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            console.log("✅ Datos del usuario:");
+            console.log(`   - Nombre: ${userData.name || "Sin nombre"}`);
+            console.log(`   - Rol: ${userData.role || "Sin rol"}`);
+            
+            console.log("🔄 Redirigiendo según rol...");
+            if (userData.role === "patient") {
+                console.log("🚀 Redirigiendo a patient-dashboard.html");
+                window.location.replace("patient-dashboard.html");
+            } else {
+                console.log("🚀 Redirigiendo a dashboard.html");
+                window.location.replace("dashboard.html");
+            }
+        } else {
+            console.warn("⚠️ El usuario no tiene documento en Firestore");
+            console.log("🔄 Redirigiendo a dashboard.html por defecto");
+            window.location.replace("dashboard.html");
+        }
+        
+        console.log("=========================================");
+
     } catch (err) {
-        console.log(err);
+        console.error("❌ Error de login:");
+        console.error(`   - Código: ${err.code}`);
+        console.error(`   - Mensaje: ${err.message}`);
+        console.log("=========================================");
         message("Credenciales incorrectas");
     }
 });
+
+console.log("✅ Formulario de login configurado");
 
 // ========================================
 // LOGOUT
 // ========================================
 
 window.logout = () => {
+    console.log("=========================================");
+    console.log("🚪 CERRANDO SESIÓN");
+    console.log("=========================================");
     signOut(auth).then(() => {
+        console.log("✅ Sesión cerrada correctamente");
+        console.log("🔄 Redirigiendo a index.html");
         window.location.href = "index.html";
+    }).catch(err => {
+        console.error("❌ Error al cerrar sesión:", err);
     });
 };
 
@@ -162,54 +328,112 @@ window.logout = () => {
 // VIEWS
 // ========================================
 
+console.log("📱 Configurando vistas...");
+
 const views = document.querySelectorAll(".view");
+console.log(`📄 Vistas encontradas: ${views.length}`);
 
 function showView(id) {
+    console.log(`📱 Mostrando vista: ${id}`);
     views.forEach(v => v.style.display = "none");
     const el = document.getElementById(id);
-    if (el) el.style.display = "block";
+    if (el) {
+        el.style.display = "block";
+        console.log(`✅ Vista ${id} mostrada`);
+    } else {
+        console.warn(`⚠️ Vista ${id} no encontrada`);
+    }
 }
 
-document.getElementById("dashboardBtn")?.addEventListener("click", () => showView("dashboardView"));
-document.getElementById("patientsBtn")?.addEventListener("click", () => showView("patientsView"));
-document.getElementById("settingsBtn")?.addEventListener("click", () => showView("settingsView"));
+document.getElementById("dashboardBtn")?.addEventListener("click", () => {
+    console.log("🖱️ Click en botón Dashboard");
+    showView("dashboardView");
+});
+document.getElementById("patientsBtn")?.addEventListener("click", () => {
+    console.log("🖱️ Click en botón Pacientes");
+    showView("patientsView");
+});
+document.getElementById("settingsBtn")?.addEventListener("click", () => {
+    console.log("🖱️ Click en botón Configuración");
+    showView("settingsView");
+});
+
+console.log("✅ Vistas configuradas");
 
 // ========================================
 // MODAL
 // ========================================
 
+console.log("🪟 Configurando modal...");
+
 const modal = document.getElementById("patientModal");
+if (modal) {
+    console.log("✅ Modal encontrado");
+} else {
+    console.warn("⚠️ Modal #patientModal no encontrado");
+}
 
 document.getElementById("newPatientBtn")?.addEventListener("click", () => {
-    modal.style.display = "flex";
+    console.log("🖱️ Click en Nuevo Paciente - Abriendo modal");
+    if (modal) modal.style.display = "flex";
 });
 
 document.getElementById("closeModal")?.addEventListener("click", () => {
-    modal.style.display = "none";
+    console.log("🖱️ Click en cerrar modal");
+    if (modal) modal.style.display = "none";
 });
 
 window.onclick = (e) => {
-    if (e.target === modal) modal.style.display = "none";
+    if (e.target === modal) {
+        console.log("🖱️ Click fuera del modal - Cerrando");
+        if (modal) modal.style.display = "none";
+    }
 };
+
+console.log("✅ Modal configurado");
 
 // ========================================
 // CREATE PATIENT
 // ========================================
 
+console.log("👤 Configurando creación de pacientes...");
+
 document.getElementById("patientForm")?.addEventListener("submit", async (e) => {
-
     e.preventDefault();
+    
+    console.log("=========================================");
+    console.log("➕ CREANDO NUEVO PACIENTE");
+    console.log("=========================================");
 
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.error("❌ No hay usuario autenticado para crear paciente");
+        message("Debes iniciar sesión primero");
+        console.log("=========================================");
+        return;
+    }
+
+    console.log(`👤 Nutricionista: ${currentUser.uid}`);
 
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("patientEmail").value.trim();
     const password = document.getElementById("patientPassword").value.trim();
 
+    console.log(`📧 Email del nuevo paciente: ${email}`);
+    console.log(`👤 Nombre: ${name}`);
+
+    if (!name || !email || !password) {
+        console.warn("⚠️ Faltan campos obligatorios");
+        message("Completa todos los campos");
+        console.log("=========================================");
+        return;
+    }
+
     try {
-
+        console.log("📡 Creando usuario en Firebase Authentication...");
         const cred = await createUserWithEmailAndPassword(auth, email, password);
+        console.log("✅ Usuario creado en Authentication:", cred.user.uid);
 
+        console.log("📡 Creando documento en Firestore...");
         await setDoc(doc(db, "users", cred.user.uid), {
             name,
             email,
@@ -248,41 +472,51 @@ document.getElementById("patientForm")?.addEventListener("submit", async (e) => 
             history: [],
             createdAt: new Date()
         });
+        console.log("✅ Documento creado en Firestore");
 
         modal.style.display = "none";
         e.target.reset();
 
+        console.log("✅ Paciente creado exitosamente");
         message("Paciente creado correctamente", "success");
+        console.log("=========================================");
 
     } catch (err) {
-        console.log(err);
+        console.error("❌ Error creando paciente:");
+        console.error(`   - Código: ${err.code}`);
+        console.error(`   - Mensaje: ${err.message}`);
         message("Error creando paciente: " + err.message);
+        console.log("=========================================");
     }
 });
+
+console.log("✅ Creación de pacientes configurada");
 
 // ========================================
 // LOAD PATIENTS
 // ========================================
 
 function loadPatients() {
-
+    console.log("📋 Cargando lista de pacientes...");
+    
     const container = document.getElementById("patientsList");
-    if (!container) return;
+    if (!container) {
+        console.warn("⚠️ #patientsList no encontrado");
+        return;
+    }
 
     const q = query(collection(db, "users"));
+    console.log("📡 Escuchando cambios en colección 'users'...");
 
     onSnapshot(q, (snap) => {
-
+        console.log(`📋 Snapshots recibidos: ${snap.size} documentos`);
         container.innerHTML = "";
 
         let count = 0;
 
         snap.forEach((d) => {
-
             const p = d.data();
-
             if (p.role !== "patient") return;
-
             count++;
 
             const div = document.createElement("div");
@@ -294,6 +528,7 @@ function loadPatients() {
             `;
 
             div.onclick = () => {
+                console.log(`🖱️ Click en paciente: ${p.name || "Sin nombre"} (${d.id})`);
                 selectedPatient = { id: d.id, ...p };
                 showPatient();
             };
@@ -301,54 +536,83 @@ function loadPatients() {
             container.appendChild(div);
         });
 
+        console.log(`✅ ${count} pacientes cargados`);
         if (count === 0) {
             container.innerHTML = "<p class='empty'>No hay pacientes registrados.</p>";
         }
     });
 }
 
+console.log("✅ Función loadPatients definida");
+
 // ========================================
 // DELETE PATIENT
 // ========================================
 
 async function deletePatient(patientId, patientName, patientEmail) {
+    console.log("=========================================");
+    console.log("🗑️ ELIMINANDO PACIENTE");
+    console.log("=========================================");
+    console.log(`   - ID: ${patientId}`);
+    console.log(`   - Nombre: ${patientName}`);
+    console.log(`   - Email: ${patientEmail}`);
+
     if (!confirm(`¿Estás seguro de eliminar al paciente "${patientName}"?\n\nEmail: ${patientEmail}\n\nEsta acción no se puede deshacer y eliminará:\n• Todos los datos del paciente\n• La cuenta de acceso del paciente`)) {
+        console.log("❌ Eliminación cancelada por el usuario");
+        console.log("=========================================");
         return false;
     }
 
     try {
         // Intentar eliminar de Authentication
+        console.log("📡 Intentando eliminar de Authentication...");
         try {
             if (auth.currentUser && auth.currentUser.uid === patientId) {
                 await deleteUser(auth.currentUser);
+                console.log("✅ Usuario eliminado de Authentication");
             } else {
-                console.warn("No se puede eliminar a otro usuario de Authentication desde el frontend");
+                console.warn("⚠️ No se puede eliminar a otro usuario de Authentication desde el frontend");
                 message("Paciente eliminado de Firestore. Para eliminar también de Authentication, usa el panel de Firebase.", "warning");
             }
         } catch (authError) {
-            console.warn("Error al eliminar de Authentication:", authError);
+            console.warn("⚠️ Error al eliminar de Authentication:", authError);
         }
 
         // Eliminar de Firestore
+        console.log("📡 Eliminando documento de Firestore...");
         await deleteDoc(doc(db, "users", patientId));
+        console.log("✅ Documento eliminado de Firestore");
         
         message(`Paciente "${patientName}" eliminado correctamente`, "success");
+        console.log("✅ Paciente eliminado exitosamente");
+        console.log("=========================================");
         return true;
 
     } catch (err) {
-        console.error("Error al eliminar:", err);
+        console.error("❌ Error al eliminar:");
+        console.error(`   - Mensaje: ${err.message}`);
+        console.log("=========================================");
         message(`Error: ${err.message}`, "error");
         return false;
     }
 }
+
+console.log("✅ Función deletePatient definida");
 
 // ========================================
 // SHOW PATIENT
 // ========================================
 
 function showPatient() {
+    console.log("👤 Mostrando detalle del paciente...");
     const view = document.getElementById("patientView");
-    if (!selectedPatient || !view) return;
+    if (!selectedPatient || !view) {
+        console.warn("⚠️ No hay paciente seleccionado o vista no encontrada");
+        return;
+    }
+
+    console.log(`   - ID: ${selectedPatient.id}`);
+    console.log(`   - Nombre: ${selectedPatient.name || "Sin nombre"}`);
 
     showView("patientView");
 
@@ -522,6 +786,7 @@ function showPatient() {
 
     // Evento para eliminar paciente
     document.getElementById("deletePatientBtn")?.addEventListener("click", async () => {
+        console.log("🖱️ Click en Eliminar Paciente");
         const success = await deletePatient(p.id, p.name, p.email);
         if (success) {
             showView("patientsView");
@@ -530,9 +795,13 @@ function showPatient() {
     });
 }
 
+console.log("✅ Función showPatient definida");
+
 // ========================================
 // GUARDAR DATOS
 // ========================================
+
+console.log("💾 Configurando guardado de datos...");
 
 document.addEventListener("click", async (e) => {
     if (!selectedPatient) return;
@@ -540,6 +809,7 @@ document.addEventListener("click", async (e) => {
     const ref = doc(db, "users", selectedPatient.id);
 
     if (e.target.id === "saveStatsBtn") {
+        console.log("💾 Guardando medidas del paciente...");
         const weight = parseFloat(document.getElementById("weight").value) || 0;
         const height = parseFloat(document.getElementById("height").value) || 0;
         const bmi = weight && height ? weight / ((height / 100) ** 2) : 0;
@@ -571,45 +841,54 @@ document.addEventListener("click", async (e) => {
 
         try {
             await updateDoc(ref, updates);
+            console.log("✅ Medidas guardadas correctamente:", updates);
             message("✅ Medidas actualizadas correctamente", "success");
         } catch (err) {
-            console.error(err);
+            console.error("❌ Error al guardar medidas:", err);
             message("Error al guardar medidas: " + err.message);
         }
     }
 
     if (e.target.id === "savePlanBtn") {
+        console.log("💾 Guardando plan nutricional...");
         const planUrl = document.getElementById("planUrl").value.trim();
         try {
             await updateDoc(ref, { planUrl });
+            console.log("✅ Plan guardado:", planUrl);
             message("✅ Plan guardado correctamente", "success");
         } catch (err) {
-            console.error(err);
+            console.error("❌ Error al guardar plan:", err);
             message("Error al guardar plan: " + err.message);
         }
     }
 
     if (e.target.id === "saveNotesBtn") {
+        console.log("💾 Guardando notas clínicas...");
         const notes = document.getElementById("notes").value.trim();
         try {
             await updateDoc(ref, { notes });
+            console.log("✅ Notas guardadas:", notes.substring(0, 50) + "...");
             message("✅ Notas guardadas correctamente", "success");
         } catch (err) {
-            console.error(err);
+            console.error("❌ Error al guardar notas:", err);
             message("Error al guardar notas: " + err.message);
         }
     }
 });
+
+console.log("✅ Guardado de datos configurado");
 
 // ========================================
 // ESTADÍSTICAS
 // ========================================
 
 function loadStats() {
-
+    console.log("📊 Cargando estadísticas...");
+    
     const q = query(collection(db, "users"));
 
     onSnapshot(q, (snap) => {
+        console.log(`📊 Snapshot de estadísticas: ${snap.size} documentos`);
 
         let patients = 0;
         let plans = 0;
@@ -618,9 +897,7 @@ function loadStats() {
         let bmiCount = 0;
 
         snap.forEach((d) => {
-
             const p = d.data();
-
             if (p.role !== "patient") return;
 
             patients++;
@@ -642,26 +919,44 @@ function loadStats() {
         document.getElementById("notesCount").textContent = notes;
         document.getElementById("avgBmi").textContent =
             bmiCount ? (bmiSum / bmiCount).toFixed(1) : "0.0";
+
+        console.log(`📊 Estadísticas actualizadas: ${patients} pacientes, ${plans} planes, ${notes} notas, ${bmiCount} IMCs`);
     });
 }
+
+console.log("✅ Función loadStats definida");
 
 // ========================================
 // BÚSQUEDA
 // ========================================
 
+console.log("🔍 Configurando búsqueda de pacientes...");
+
 document.getElementById("searchPatient")?.addEventListener("input", (e) => {
     const value = e.target.value.toLowerCase().trim();
+    console.log(`🔍 Buscando: "${value}"`);
+    
     const cards = document.querySelectorAll(".patient-card");
+    let encontrados = 0;
 
     cards.forEach(card => {
         const text = card.textContent.toLowerCase();
-        card.style.display = text.includes(value) ? "block" : "none";
+        const visible = text.includes(value);
+        card.style.display = visible ? "block" : "none";
+        if (visible) encontrados++;
     });
+    
+    console.log(`🔍 Resultados: ${encontrados} pacientes encontrados`);
 });
 
+console.log("✅ Búsqueda configurada");
+
 // ========================================
-// INICIALIZACIÓN
+// INICIALIZACIÓN COMPLETA
 // ========================================
 
-console.log("✅ DB Nubers - Panel de administración cargado");
+console.log("=========================================");
+console.log("✅ DB Nubers - Panel de administración CARGADO COMPLETAMENTE");
+console.log("=========================================");
 console.log("📊 Esperando autenticación...");
+console.log("=========================================");
