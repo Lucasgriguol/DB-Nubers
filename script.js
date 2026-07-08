@@ -75,14 +75,15 @@ async function limpiarSesionFirebase() {
 }
 
 // ========================================
-// CONFIGURAR PERSISTENCIA
+// CONFIGURAR PERSISTENCIA - CAMBIADO A browserLocalPersistence
 // ========================================
 
 console.log("⚙️ Configurando persistencia de Firebase...");
 
 try {
-    await setPersistence(auth, inMemoryPersistence);
-    console.log('✅ Persistencia configurada a "inMemory" (no guarda sesión)');
+    // ✅ CAMBIADO: Usar browserLocalPersistence en lugar de inMemoryPersistence
+    await setPersistence(auth, browserLocalPersistence);
+    console.log('✅ Persistencia configurada a "browserLocal" (guarda sesión en localStorage)');
 } catch (error) {
     console.error('❌ Error configurando persistencia:', error);
 }
@@ -187,14 +188,14 @@ onAuthStateChanged(auth, async (user) => {
             
             if (currentUserData?.role === "patient") {
                 console.log("🚀 Redirigiendo a patient-dashboard.html (rol: patient)");
-                window.location.replace("patient-dashboard.html");
+                window.location.href = "patient-dashboard.html";
             } else if (currentUserData?.role === "admin" || currentUserData?.role === "nutritionist") {
                 console.log("🚀 Redirigiendo a dashboard.html (rol:", currentUserData?.role, ")");
-                window.location.replace("dashboard.html");
+                window.location.href = "dashboard.html";
             } else {
                 console.warn("⚠️ Rol desconocido o no definido:", currentUserData?.role);
                 console.log("🔄 Redirigiendo a dashboard.html por defecto");
-                window.location.replace("dashboard.html");
+                window.location.href = "dashboard.html";
             }
             console.log("=========================================");
             return;
@@ -205,7 +206,7 @@ onAuthStateChanged(auth, async (user) => {
             console.log("📊 Estamos en dashboard.html, cargando datos...");
             if (currentUserData?.role === "patient") {
                 console.warn("⚠️ Un paciente está en dashboard.html, redirigiendo a patient-dashboard.html");
-                window.location.replace("patient-dashboard.html");
+                window.location.href = "patient-dashboard.html";
                 return;
             }
             loadPatients();
@@ -215,7 +216,7 @@ onAuthStateChanged(auth, async (user) => {
             console.log("👤 Estamos en patient-dashboard.html");
             if (currentUserData?.role !== "patient") {
                 console.warn("⚠️ Un no-paciente está en patient-dashboard.html, redirigiendo a dashboard.html");
-                window.location.replace("dashboard.html");
+                window.location.href = "dashboard.html";
                 return;
             }
             console.log("✅ Portal del paciente cargado correctamente");
@@ -236,7 +237,7 @@ onAuthStateChanged(auth, async (user) => {
 console.log("✅ Listener de autenticación configurado");
 
 // ========================================
-// LOGIN
+// LOGIN - CORREGIDO
 // ========================================
 
 console.log("🔑 Configurando formulario de login...");
@@ -267,9 +268,8 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
         console.log("✅ Login EXITOSO");
         console.log(`   - UID: ${result.user.uid}`);
         console.log(`   - Email: ${result.user.email}`);
-        console.log(`   - Email verificado: ${result.user.emailVerified}`);
 
-        // Cargar datos del usuario
+        // 🔥 NUEVO: Cargar datos del usuario y redirigir INMEDIATAMENTE
         console.log("📡 Cargando datos del usuario logueado...");
         const ref = doc(db, "users", result.user.uid);
         const docSnap = await getDoc(ref);
@@ -283,15 +283,15 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
             console.log("🔄 Redirigiendo según rol...");
             if (userData.role === "patient") {
                 console.log("🚀 Redirigiendo a patient-dashboard.html");
-                window.location.replace("patient-dashboard.html");
+                window.location.href = "patient-dashboard.html";
             } else {
                 console.log("🚀 Redirigiendo a dashboard.html");
-                window.location.replace("dashboard.html");
+                window.location.href = "dashboard.html";
             }
         } else {
             console.warn("⚠️ El usuario no tiene documento en Firestore");
             console.log("🔄 Redirigiendo a dashboard.html por defecto");
-            window.location.replace("dashboard.html");
+            window.location.href = "dashboard.html";
         }
         
         console.log("=========================================");
@@ -301,7 +301,19 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
         console.error(`   - Código: ${err.code}`);
         console.error(`   - Mensaje: ${err.message}`);
         console.log("=========================================");
-        message("Credenciales incorrectas");
+        
+        // Mensajes de error más amigables
+        let mensaje = "Credenciales incorrectas";
+        if (err.code === "auth/user-not-found") {
+            mensaje = "Usuario no encontrado";
+        } else if (err.code === "auth/wrong-password") {
+            mensaje = "Contraseña incorrecta";
+        } else if (err.code === "auth/too-many-requests") {
+            mensaje = "Demasiados intentos, espera un momento";
+        } else if (err.code === "auth/unauthorized-domain") {
+            mensaje = "Dominio no autorizado. Contacta al administrador.";
+        }
+        message(mensaje);
     }
 });
 
