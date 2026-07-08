@@ -16,31 +16,15 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
-    deleteUser
+    deleteUser,
+    setPersistence,
+    inMemoryPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-/* =========================
-   STATE
-========================= */
-
-let currentUser = null;
-let currentUserData = null;
-let selectedPatient = null;
-
-/* =========================
-   MESSAGE
-========================= */
-
-function message(text, type = "error") {
-    const el = document.getElementById("message");
-    if (!el) return;
-
-    el.textContent = text;
-    el.style.color = type === "success" ? "#2ecc71" : "#e74c3c";
-}
-
 // ========================================
-// FIX: LIMPIAR SESIÓN ANTERIOR
+// 🔥 FIX: LIMPIAR SESIÓN ANTERIOR
 // ========================================
 
 async function limpiarSesionFirebase() {
@@ -69,21 +53,44 @@ async function limpiarSesionFirebase() {
     }
 }
 
+// ========================================
+// CONFIGURAR PERSISTENCIA
+// ========================================
+
 // Configurar persistencia (no guardar sesión)
-await setPersistence(auth, inMemoryPersistence)
-    .then(() => {
-        console.log('✅ Persistencia configurada a "inMemory"');
-    })
-    .catch((error) => {
-        console.error('❌ Error configurando persistencia:', error);
-    });
+try {
+    await setPersistence(auth, inMemoryPersistence);
+    console.log('✅ Persistencia configurada a "inMemory" (no guarda sesión)');
+} catch (error) {
+    console.error('❌ Error configurando persistencia:', error);
+}
 
 // Limpiar sesión anterior
 await limpiarSesionFirebase();
 
-/* =========================
-   AUTH
-========================= */
+// ========================================
+// STATE
+// ========================================
+
+let currentUser = null;
+let currentUserData = null;
+let selectedPatient = null;
+
+// ========================================
+// MESSAGE
+// ========================================
+
+function message(text, type = "error") {
+    const el = document.getElementById("message");
+    if (!el) return;
+
+    el.textContent = text;
+    el.style.color = type === "success" ? "#2ecc71" : "#e74c3c";
+}
+
+// ========================================
+// AUTH
+// ========================================
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -122,9 +129,9 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-/* =========================
-   LOGIN
-========================= */
+// ========================================
+// LOGIN
+// ========================================
 
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
@@ -141,9 +148,9 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     }
 });
 
-/* =========================
-   LOGOUT
-========================= */
+// ========================================
+// LOGOUT
+// ========================================
 
 window.logout = () => {
     signOut(auth).then(() => {
@@ -151,9 +158,9 @@ window.logout = () => {
     });
 };
 
-/* =========================
-   VIEWS
-========================= */
+// ========================================
+// VIEWS
+// ========================================
 
 const views = document.querySelectorAll(".view");
 
@@ -167,9 +174,9 @@ document.getElementById("dashboardBtn")?.addEventListener("click", () => showVie
 document.getElementById("patientsBtn")?.addEventListener("click", () => showView("patientsView"));
 document.getElementById("settingsBtn")?.addEventListener("click", () => showView("settingsView"));
 
-/* =========================
-   MODAL
-========================= */
+// ========================================
+// MODAL
+// ========================================
 
 const modal = document.getElementById("patientModal");
 
@@ -185,9 +192,9 @@ window.onclick = (e) => {
     if (e.target === modal) modal.style.display = "none";
 };
 
-/* =========================
-   CREATE PATIENT
-========================= */
+// ========================================
+// CREATE PATIENT
+// ========================================
 
 document.getElementById("patientForm")?.addEventListener("submit", async (e) => {
 
@@ -209,16 +216,12 @@ document.getElementById("patientForm")?.addEventListener("submit", async (e) => 
             role: "patient",
             nutritionistId: currentUser.uid,
 
-            // Medidas básicas
             weight: 0,
             height: 0,
             bmi: 0,
 
-            // Datos personales
             birthDate: "",
             age: 0,
-
-            // Perímetros
             waistMax: 0,
             waistMin: 0,
             hip: 0,
@@ -226,24 +229,20 @@ document.getElementById("patientForm")?.addEventListener("submit", async (e) => 
             thighMid: 0,
             calf: 0,
 
-            // Composición corporal (kg)
             fatMassKg: 0,
             muscleMassKg: 0,
             boneMassKg: 0,
 
-            // Composición corporal (%)
             musclePercent: 0,
             fatPercent: 0,
             bonePercent: 0,
             residualPercent: 0,
 
-            // Índices y sumatorias
             skinfoldsSum: 0,
             muscleBoneIndex: 0,
             waistHipIndex: 0,
             muscleFatIndex: 0,
 
-            // Otros
             notes: "",
             planUrl: "",
             history: [],
@@ -261,9 +260,9 @@ document.getElementById("patientForm")?.addEventListener("submit", async (e) => 
     }
 });
 
-/* =========================
-   LOAD PATIENTS
-========================= */
+// ========================================
+// LOAD PATIENTS
+// ========================================
 
 function loadPatients() {
 
@@ -308,9 +307,9 @@ function loadPatients() {
     });
 }
 
-/* =========================
-   DELETE PATIENT (COMPLETO)
-========================= */
+// ========================================
+// DELETE PATIENT
+// ========================================
 
 async function deletePatient(patientId, patientName, patientEmail) {
     if (!confirm(`¿Estás seguro de eliminar al paciente "${patientName}"?\n\nEmail: ${patientEmail}\n\nEsta acción no se puede deshacer y eliminará:\n• Todos los datos del paciente\n• La cuenta de acceso del paciente`)) {
@@ -318,23 +317,19 @@ async function deletePatient(patientId, patientName, patientEmail) {
     }
 
     try {
-        // 1. Primero eliminar de Authentication
+        // Intentar eliminar de Authentication
         try {
-            // Para eliminar a otro usuario, necesitamos re-autenticarnos
-            // o usar Firebase Admin SDK. Como estamos en frontend,
-            // solo podemos eliminar al usuario actual.
-            // Si el nutricionista está eliminando a un paciente,
-            // NO es el mismo usuario, por lo que necesitamos un enfoque diferente.
-            
-            // Opción: Usamos una Cloud Function (recomendado)
-            // Por ahora, mostramos un mensaje y eliminamos solo de Firestore
-            console.warn("Eliminando de Authentication requiere Firebase Admin SDK o Cloud Function");
-            message("Eliminando datos de Firestore...", "success");
+            if (auth.currentUser && auth.currentUser.uid === patientId) {
+                await deleteUser(auth.currentUser);
+            } else {
+                console.warn("No se puede eliminar a otro usuario de Authentication desde el frontend");
+                message("Paciente eliminado de Firestore. Para eliminar también de Authentication, usa el panel de Firebase.", "warning");
+            }
         } catch (authError) {
             console.warn("Error al eliminar de Authentication:", authError);
         }
 
-        // 2. Eliminar de Firestore
+        // Eliminar de Firestore
         await deleteDoc(doc(db, "users", patientId));
         
         message(`Paciente "${patientName}" eliminado correctamente`, "success");
@@ -347,9 +342,9 @@ async function deletePatient(patientId, patientName, patientEmail) {
     }
 }
 
-/* =========================
-   SHOW PATIENT (CON TODAS LAS MEDIDAS)
-========================= */
+// ========================================
+// SHOW PATIENT
+// ========================================
 
 function showPatient() {
     const view = document.getElementById("patientView");
@@ -535,51 +530,39 @@ function showPatient() {
     });
 }
 
-/* =========================
-   GUARDAR DATOS (MEDIDAS, PLAN, NOTAS)
-========================= */
+// ========================================
+// GUARDAR DATOS
+// ========================================
 
 document.addEventListener("click", async (e) => {
     if (!selectedPatient) return;
 
     const ref = doc(db, "users", selectedPatient.id);
 
-    // Guardar medidas
     if (e.target.id === "saveStatsBtn") {
         const weight = parseFloat(document.getElementById("weight").value) || 0;
         const height = parseFloat(document.getElementById("height").value) || 0;
         const bmi = weight && height ? weight / ((height / 100) ** 2) : 0;
 
         const updates = {
-            // Básicas
             weight,
             height,
             bmi,
-            
-            // Datos personales
             birthDate: document.getElementById("birthDate").value || "",
             age: parseInt(document.getElementById("age").value) || 0,
-            
-            // Perímetros
             waistMax: parseFloat(document.getElementById("waistMax").value) || 0,
             waistMin: parseFloat(document.getElementById("waistMin").value) || 0,
             hip: parseFloat(document.getElementById("hip").value) || 0,
             armFlexed: parseFloat(document.getElementById("armFlexed").value) || 0,
             thighMid: parseFloat(document.getElementById("thighMid").value) || 0,
             calf: parseFloat(document.getElementById("calf").value) || 0,
-            
-            // Composición corporal (kg)
             fatMassKg: parseFloat(document.getElementById("fatMassKg").value) || 0,
             muscleMassKg: parseFloat(document.getElementById("muscleMassKg").value) || 0,
             boneMassKg: parseFloat(document.getElementById("boneMassKg").value) || 0,
-            
-            // Composición corporal (%)
             musclePercent: parseFloat(document.getElementById("musclePercent").value) || 0,
             fatPercent: parseFloat(document.getElementById("fatPercent").value) || 0,
             bonePercent: parseFloat(document.getElementById("bonePercent").value) || 0,
             residualPercent: parseFloat(document.getElementById("residualPercent").value) || 0,
-            
-            // Índices y sumatorias
             skinfoldsSum: parseFloat(document.getElementById("skinfoldsSum").value) || 0,
             muscleBoneIndex: parseFloat(document.getElementById("muscleBoneIndex").value) || 0,
             waistHipIndex: parseFloat(document.getElementById("waistHipIndex").value) || 0,
@@ -595,7 +578,6 @@ document.addEventListener("click", async (e) => {
         }
     }
 
-    // Guardar plan
     if (e.target.id === "savePlanBtn") {
         const planUrl = document.getElementById("planUrl").value.trim();
         try {
@@ -607,7 +589,6 @@ document.addEventListener("click", async (e) => {
         }
     }
 
-    // Guardar notas
     if (e.target.id === "saveNotesBtn") {
         const notes = document.getElementById("notes").value.trim();
         try {
@@ -620,9 +601,9 @@ document.addEventListener("click", async (e) => {
     }
 });
 
-/* =========================
-   ESTADÍSTICAS EN TIEMPO REAL
-========================= */
+// ========================================
+// ESTADÍSTICAS
+// ========================================
 
 function loadStats() {
 
@@ -664,13 +645,12 @@ function loadStats() {
     });
 }
 
-/* =========================
-   BÚSQUEDA DE PACIENTES
-========================= */
+// ========================================
+// BÚSQUEDA
+// ========================================
 
 document.getElementById("searchPatient")?.addEventListener("input", (e) => {
     const value = e.target.value.toLowerCase().trim();
-
     const cards = document.querySelectorAll(".patient-card");
 
     cards.forEach(card => {
@@ -678,3 +658,10 @@ document.getElementById("searchPatient")?.addEventListener("input", (e) => {
         card.style.display = text.includes(value) ? "block" : "none";
     });
 });
+
+// ========================================
+// INICIALIZACIÓN
+// ========================================
+
+console.log("✅ DB Nubers - Panel de administración cargado");
+console.log("📊 Esperando autenticación...");
