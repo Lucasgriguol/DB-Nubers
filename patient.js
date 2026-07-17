@@ -11,6 +11,24 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+// ========================================
+// CLASIFICACIÓN DEL IMC
+// ========================================
+
+function getIMCClassification(bmi) {
+    if (bmi < 18.5) {
+        return { text: 'Bajo Peso', color: '#f39c12' };
+    } else if (bmi >= 18.5 && bmi <= 24.99) {
+        return { text: 'Peso Saludable', color: '#2ecc71' };
+    } else if (bmi >= 25 && bmi <= 29.99) {
+        return { text: 'Sobrepeso', color: '#e67e22' };
+    } else if (bmi >= 30) {
+        return { text: 'Obesidad', color: '#e74c3c' };
+    } else {
+        return { text: '--', color: '#95a5a6' };
+    }
+}
+
 let currentUser = null;
 let patientRef = null;
 
@@ -51,6 +69,7 @@ function loadPatientData() {
         const weightEl = document.getElementById("weightValue");
         const heightEl = document.getElementById("heightValue");
         const bmiEl = document.getElementById("bmiValue");
+        const bmiClassificationEl = document.getElementById("bmiClassification");
 
         if (weightEl) weightEl.textContent = data.weight ?? "--";
         if (heightEl) heightEl.textContent = data.height ?? "--";
@@ -60,6 +79,16 @@ function loadPatientData() {
             : "--";
 
         if (bmiEl) bmiEl.textContent = bmi;
+
+        // Clasificación del IMC dentro de la misma card
+        if (bmiClassificationEl && bmi !== "--") {
+            const classification = getIMCClassification(parseFloat(bmi));
+            bmiClassificationEl.textContent = classification.text;
+            bmiClassificationEl.style.color = classification.color;
+        } else if (bmiClassificationEl) {
+            bmiClassificationEl.textContent = "--";
+            bmiClassificationEl.style.color = '#95a5a6';
+        }
 
         /* =========================
            INFO PERFIL
@@ -84,7 +113,6 @@ function loadPatientData() {
 
         if (notesContainer) {
             if (data.notes && data.notes.trim() !== "") {
-                // Formatear las notas (reemplazar saltos de línea por <br>)
                 const formattedNotes = data.notes.replace(/\n/g, '<br>');
                 notesContainer.innerHTML = `
                     <div style="background:#f8f9fc; padding:1rem; border-radius:8px; border-left:4px solid #3498db;">
@@ -190,9 +218,4 @@ window.showView = (id) => {
     if (el) el.style.display = "block";
 };
 
-/* =========================
-   INICIALIZACIÓN
-========================= */
-
 console.log("✅ DB Nubers - Portal del Paciente cargado");
-console.log("📊 Esperando autenticación...");

@@ -20,7 +20,23 @@ import {
     setPersistence,
     browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+// ========================================
+// CLASIFICACIÓN DEL IMC
+// ========================================
 
+function getIMCClassification(bmi) {
+    if (bmi < 18.5) {
+        return { text: 'Bajo Peso', color: '#f39c12' };
+    } else if (bmi >= 18.5 && bmi <= 24.99) {
+        return { text: 'Peso Saludable', color: '#2ecc71' };
+    } else if (bmi >= 25 && bmi <= 29.99) {
+        return { text: 'Sobrepeso', color: '#e67e22' };
+    } else if (bmi >= 30) {
+        return { text: 'Obesidad', color: '#e74c3c' };
+    } else {
+        return { text: '--', color: '#95a5a6' };
+    }
+}
 // ========================================
 // LIMPIAR SESIÓN ANTERIOR
 // ========================================
@@ -99,7 +115,7 @@ onAuthStateChanged(auth, async (user) => {
     try {
         const ref = doc(db, "users", user.uid);
         const docSnap = await getDoc(ref);
-        
+
         if (docSnap.exists()) {
             currentUserData = docSnap.data();
         } else {
@@ -156,7 +172,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
         const ref = doc(db, "users", result.user.uid);
         const docSnap = await getDoc(ref);
-        
+
         if (docSnap.exists()) {
             const userData = docSnap.data();
             if (userData.role === "patient") {
@@ -429,7 +445,11 @@ function showPatient() {
                 </label>
                 <label>
                     <span>IMC</span>
-                    <input type="text" id="bmi" value="${bmi}" readonly style="background:#f0f2f5;">
+                    <input type="text" id="bmi" value="${bmi}" readonly style="background:#f0f2f5; width:40%;">
+                </label>
+                <label>
+                    <span>Clasificación</span>
+                    <input type="text" id="bmiClassification" value="${bmi ? getIMCClassification(parseFloat(bmi)).text : '--'}" readonly style="background:#f0f2f5; color:${bmi ? getIMCClassification(parseFloat(bmi)).color : '#95a5a6'}; font-weight:600; width:40%;">
                 </label>
             </div>
 
