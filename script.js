@@ -418,7 +418,7 @@ function showPatient() {
             </div>
 
             <div class="measure-group">
-                <h3 style="margin-top:0;">📏 Antropometría básica</h3>
+                <h3 style="margin-top:0;">📏 Medidas básica</h3>
                 <label>
                     <span>Talla (cm)</span>
                     <input type="number" id="height" value="${p.height || ""}" step="0.1" min="0">
